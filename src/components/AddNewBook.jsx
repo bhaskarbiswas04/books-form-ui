@@ -13,6 +13,8 @@ const AddNewBook = ()=>{
    summary: "",
    coverImageUrl: "",
  });
+ const [addedBooks, setAddedBooks] = useState([]);
+ 
 
  //Function to handle change during user input.
  const handleChange = (event)=>{
@@ -25,9 +27,41 @@ const AddNewBook = ()=>{
     event.preventDefault();
     console.log("Submitted Book:", bookData);
     try {
+        const response = await fetch(
+          "https://books-dummy-level-one.vercel.app/books",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bookData),
+          }
+        );
+
+         if (!response.ok) {
+           throw new Error(`Server Error: ${response.status}`);
+         }
+
+        const data = await response.json();
+        console.log("Book added successfully:", data);
+        alert("Book added successfully!");
+
+        setAddedBooks((prevBooks) => [...prevBooks, data.book]);
+        console.log(addedBooks);
         
+
+        setBookData({
+          title: "",
+          author: "",
+          publishedYear: "",
+          genre: "",
+          language: "",
+          country: "",
+          rating: "",
+          summary: "",
+          coverImageUrl: "",
+        });
     } catch (error) {
-        
+        console.error("Error adding book:", error);
+        alert(" Failed to add book");
     }
  }
 
@@ -35,7 +69,7 @@ const AddNewBook = ()=>{
  return (
    <div>
      <h2>Add New Book</h2>
-     <form>
+     <form onSubmit={handleSubmit}>
        <label htmlFor="title">Title: </label>
        <input
          type="text"
@@ -135,6 +169,22 @@ const AddNewBook = ()=>{
 
        <button type="submit">Add Book</button>
      </form>
+
+     {/* Displaying newly added books. */}
+     <div style={{ marginTop: "30px" }}>
+       <h3>Books Added:</h3>
+       {addedBooks.length === 0 ? (
+         <p>No books added yet.</p>
+       ) : (
+         <ul>
+           {addedBooks.map((book, index) => (
+             <li key={index}>
+               <strong>{book.title}</strong> by {book.author}
+             </li>
+           ))}
+         </ul>
+       )}
+     </div>
    </div>
  );
 }
